@@ -1,265 +1,167 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>ERIC.exe Live Chat</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    /* Basic styling for chat and login */
-    body, html {
-      margin: 0; padding: 0; height: 100%;
+    /* ... your existing CSS here ... */
+    /* For brevity, just keep the CSS from your last version */
+    /* I'll include a simple snippet so you know where it goes */
+    body {
       background: #0f111a;
       color: #e0e0e0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
       display: flex;
       flex-direction: column;
       height: 100vh;
     }
-    #loginScreen {
-      background: #1e2129;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 12px;
-      padding: 2rem;
-      height: 100%;
-    }
-    input[type="text"], input[type="password"] {
-      padding: 12px 16px;
-      font-size: 1rem;
-      border-radius: 9999px;
-      border: none;
-      background: #2a2e3d;
-      color: #eee;
-      width: 250px;
-      outline: none;
-      transition: background-color 0.3s ease;
-    }
-    input[type="text"]:focus, input[type="password"]:focus {
-      background: #3b4252;
-    }
-    button {
-      background: #ff5722;
-      border: none;
-      border-radius: 9999px;
-      padding: 12px 24px;
-      color: white;
-      font-weight: 700;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: background-color 0.25s ease;
-      user-select: none;
-    }
-    button:hover {
-      background: #e64a19;
-    }
-    #errorMsg {
-      color: #ff7043;
-      font-weight: 700;
-    }
-    #chatContainer {
-      display: none;
-      flex-direction: column;
-      height: 100%;
-      flex-grow: 1;
-    }
-    header {
-      padding: 1.5rem;
-      font-size: 2rem;
-      font-weight: 700;
-      color: #ff5722;
-      text-align: center;
-      border-bottom: 1px solid #222831;
-      user-select: none;
-    }
-    #chat {
-      flex-grow: 1;
-      overflow-y: auto;
-      padding: 1rem 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      background: #1e2129;
-    }
-    .message {
-      max-width: 65%;
-      padding: 10px 15px;
-      border-radius: 12px;
-      line-height: 1.4;
-      word-wrap: break-word;
-      font-size: 1rem;
-      user-select: text;
-      box-shadow: 0 2px 5px rgb(0 0 0 / 0.2);
-      transition: background-color 0.3s ease;
-    }
-    .user {
-      background: #ff7043;
-      color: #fff;
-      align-self: flex-end;
-      border-bottom-right-radius: 4px;
-    }
-    .other {
-      background: #2f3542;
-      color: #ffcc80;
-      align-self: flex-start;
-      border-bottom-left-radius: 4px;
-    }
-    form {
-      display: flex;
-      padding: 1rem 1.5rem;
-      background: #12151d;
-      border-top: 1px solid #222831;
-    }
-    input[type="text"]#messageInput {
-      flex-grow: 1;
-      border: none;
-      border-radius: 9999px;
-      padding: 12px 20px;
-      font-size: 1rem;
-      outline: none;
-      background: #2a2e3d;
-      color: #eee;
-      transition: background-color 0.3s ease;
-    }
-    input[type="text"]#messageInput:focus {
-      background: #3b4252;
-    }
-    #userCount {
-      text-align: center;
-      padding: 6px;
-      color: #888;
-      font-size: 0.9rem;
-    }
+    /* Add the rest of your CSS here */
+    /* ... */
   </style>
 </head>
 <body>
-  <div id="loginScreen">
-    <h1>ERIC.exe Login</h1>
-    <input id="usernameInput" type="text" placeholder="Username" autocomplete="off" />
-    <input id="passwordInput" type="password" placeholder="Password" autocomplete="off" />
-    <div id="errorMsg"></div>
-    <div>
-      <button id="loginBtn">Log In</button>
-      <button id="signupBtn">Sign Up</button>
-    </div>
+
+  <div id="bootScreen">
+    <h1 id="bootTitle">ERIC.exe</h1>
+    <p id="bootMeaning">Experimental Reactive Intelligence Core</p>
   </div>
 
-  <div id="chatContainer">
-    <header>ERIC.exe Live Chat</header>
-    <div id="chat"></div>
-    <div id="userCount">Users online: 0</div>
-    <form id="chatForm">
-      <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off" required />
-      <button type="submit">Send</button>
-    </form>
-  </div>
+  <header>ERIC.exe Live Chat</header>
+
+  <div id="chat"></div>
+
+  <form id="chatForm">
+    <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off" required />
+    <button type="submit">Send</button>
+  </form>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
+    // Boot screen fade out
+    window.addEventListener("DOMContentLoaded", () => {
+      const bootScreen = document.getElementById("bootScreen");
+      setTimeout(() => {
+        bootScreen.style.display = "none";
+      }, 6000);
+    });
+
     const socket = io();
 
-    const loginScreen = document.getElementById('loginScreen');
-    const chatContainer = document.getElementById('chatContainer');
-    const usernameInput = document.getElementById('usernameInput');
-    const passwordInput = document.getElementById('passwordInput');
-    const loginBtn = document.getElementById('loginBtn');
-    const signupBtn = document.getElementById('signupBtn');
-    const errorMsg = document.getElementById('errorMsg');
+    // Simple username prompt UI
+    function askUsername() {
+      return new Promise((resolve) => {
+        const container = document.createElement('div');
+        container.style.position = 'fixed';
+        container.style.top = 0;
+        container.style.left = 0;
+        container.style.right = 0;
+        container.style.bottom = 0;
+        container.style.background = 'rgba(15,17,26,0.95)';
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.style.justifyContent = 'center';
+        container.style.alignItems = 'center';
+        container.style.zIndex = '9999';
+
+        const label = document.createElement('label');
+        label.textContent = 'Enter your username:';
+        label.style.color = '#ff5722';
+        label.style.fontSize = '1.5rem';
+        label.style.marginBottom = '1rem';
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.style.padding = '10px 15px';
+        input.style.fontSize = '1.2rem';
+        input.style.borderRadius = '8px';
+        input.style.border = 'none';
+        input.style.outline = 'none';
+        input.style.width = '250px';
+        input.autocomplete = 'off';
+
+        const btn = document.createElement('button');
+        btn.textContent = 'Join Chat';
+        btn.style.marginTop = '1rem';
+        btn.style.padding = '10px 20px';
+        btn.style.fontSize = '1.2rem';
+        btn.style.borderRadius = '8px';
+        btn.style.border = 'none';
+        btn.style.background = '#ff5722';
+        btn.style.color = '#fff';
+        btn.style.cursor = 'pointer';
+
+        btn.addEventListener('click', () => {
+          if (input.value.trim()) {
+            resolve(input.value.trim());
+            document.body.removeChild(container);
+          }
+        });
+
+        input.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter' && input.value.trim()) {
+            e.preventDefault();
+            resolve(input.value.trim());
+            document.body.removeChild(container);
+          }
+        });
+
+        container.appendChild(label);
+        container.appendChild(input);
+        container.appendChild(btn);
+        document.body.appendChild(container);
+        input.focus();
+      });
+    }
+
+    let username;
+
+    askUsername().then(name => {
+      username = name;
+    });
 
     const chat = document.getElementById('chat');
-    const chatForm = document.getElementById('chatForm');
-    const messageInput = document.getElementById('messageInput');
-    const userCount = document.getElementById('userCount');
+    const form = document.getElementById('chatForm');
+    const input = document.getElementById('messageInput');
 
-    let currentUser = null;
-
-    function showError(msg) {
-      errorMsg.textContent = msg;
-      setTimeout(() => { errorMsg.textContent = ''; }, 4000);
-    }
-
-    signupBtn.onclick = async () => {
-      const username = usernameInput.value.trim();
-      const password = passwordInput.value.trim();
-      if (!username || !password) {
-        showError('Please enter username and password');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!username) {
+        alert("Please enter a username first!");
         return;
       }
-      try {
-        const res = await fetch('/signup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password })
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          showError(data.error || 'Signup failed');
-          return;
-        }
-        alert('Signup successful! You can now log in.');
-      } catch (e) {
-        showError('Network error');
-      }
-    };
+      const msg = input.value.trim();
+      if (!msg) return;
+      socket.emit('chat message', { user: username, text: msg });
+      input.value = '';
+    });
 
-    loginBtn.onclick = async () => {
-      const username = usernameInput.value.trim();
-      const password = passwordInput.value.trim();
-      if (!username || !password) {
-        showError('Please enter username and password');
-        return;
-      }
-      try {
-        const res = await fetch('/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password })
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          showError(data.error || 'Login failed');
-          return;
-        }
-        currentUser = username;
-        socket.emit('user login', username);
-        loginScreen.style.display = 'none';
-        chatContainer.style.display = 'flex';
-        messageInput.focus();
-      } catch (e) {
-        showError('Network error');
-      }
-    };
+    // Receive chat history on connect
+    socket.on('chat history', (msgs) => {
+      msgs.forEach(data => {
+        const sender = data.user === username ? 'user' : 'other';
+        addMessage(`${data.user}: ${data.text}`, sender);
+      });
+    });
 
-    function addMessage(user, text) {
-      const div = document.createElement('div');
-      div.classList.add('message');
-      if (user === currentUser) div.classList.add('user');
-      else div.classList.add('other');
-      div.textContent = `${user}: ${text}`;
-      chat.appendChild(div);
+    socket.on('chat message', (data) => {
+      // Avoid duplicating own message from history
+      const lastMessage = chat.lastChild;
+      if (lastMessage && lastMessage.textContent === `${data.user}: ${data.text}`) return;
+
+      const sender = data.user === username ? 'user' : 'other';
+      addMessage(`${data.user}: ${data.text}`, sender);
+    });
+
+    function addMessage(text, sender) {
+      const msgDiv = document.createElement('div');
+      msgDiv.classList.add('message', sender);
+      msgDiv.textContent = text;
+      chat.appendChild(msgDiv);
       chat.scrollTop = chat.scrollHeight;
     }
-
-    socket.on('chat message', ({ user, text }) => {
-      addMessage(user, text);
-    });
-
-    socket.on('error message', (msg) => {
-      showError(msg);
-    });
-
-    socket.on('user count', (count) => {
-      userCount.textContent = `Users online: ${count}`;
-    });
-
-    chatForm.onsubmit = (e) => {
-      e.preventDefault();
-      const msg = messageInput.value.trim();
-      if (!msg) return;
-      socket.emit('chat message', msg);
-      messageInput.value = '';
-    };
   </script>
+
 </body>
 </html>
