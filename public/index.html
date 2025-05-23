@@ -241,6 +241,13 @@
       chat.scrollTop = chat.scrollHeight;
     }
 
+    // New: Receive and display last 250 messages on login
+    socket.on('message history', (history) => {
+      history.forEach(({ user, text }) => {
+        addMessage(user, text);
+      });
+    });
+
     socket.on('chat message', ({ user, text }) => {
       addMessage(user, text);
     });

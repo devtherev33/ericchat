@@ -8,6 +8,9 @@ const users = new Map();
 const connectedUsers = new Map();
 const lastMessageTime = new Map();
 
+const MAX_HISTORY = 250;
+const messageHistory = []; // store last 250 messages here
+
 app.use(express.static("public"));
 app.use(express.json());
 
@@ -43,6 +46,10 @@ io.on("connection", (socket) => {
   socket.on("user login", (username) => {
     connectedUsers.set(socket.id, username);
     console.log(`User logged in: ${username}`);
+
+    // Send message history to this new user
+    socket.emit("message history", messageHistory);
+
     io.emit("user count", connectedUsers.size);
   });
 
@@ -66,7 +73,16 @@ io.on("connection", (socket) => {
     }
 
     lastMessageTime.set(username, now);
-    io.emit("chat message", { user: username, text: msg });
+
+    const messageObj = { user: username, text: msg };
+
+    // Add message to history, trim if needed
+    messageHistory.push(messageObj);
+    if (messageHistory.length > MAX_HISTORY) {
+      messageHistory.shift(); // remove oldest message
+    }
+
+    io.emit("chat message", messageObj);
   });
 
   socket.on("disconnect", () => {
